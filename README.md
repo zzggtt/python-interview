@@ -282,6 +282,6 @@ class HauntedBus:
 
 ## 7 装饰器
 
-关于装饰器的面试考察和知识点可以参考：[Python面试---装饰器](https://www.cnblogs.com/zzggtt/p/17099448.html)
+关于装饰器的面试考察和知识点可以参考下我的总结：[Python面试---装饰器](https://www.cnblogs.com/zzggtt/p/17099448.html)
 
 
