@@ -118,3 +118,161 @@ for animal in animals_list:
 自省（Introspection）是动态语言又一强大的特性，可以在运行时通过一定的机制查询到对象的内部结构；例如`dir()`、`isinstance()` 等。
 
 
+
+## Python中函数参数传递
+
+from: [taizilongxu/interview_python](https://github.com/taizilongxu/interview_python)，对其进行了主要对考察的知识点&知识点延伸进行了补充。
+
+看两个例子:
+
+```python
+a = 1
+def fun(a):
+    a = 2
+fun(a)
+print a  # 1
+```
+
+```python
+a = []
+def fun(a):
+    a.append(1)
+fun(a)
+print a  # [1]
+```
+
+所有的变量都可以理解是内存中一个对象的“引用”，或者，也可以看似c中void*的感觉。
+
+通过`id`来看引用`a`的内存地址可以比较理解：
+
+```python
+a = 1
+def fun(a):
+    print "func_in",id(a)   # func_in 41322472
+    a = 2
+    print "re-point",id(a), id(2)   # re-point 41322448 41322448
+print "func_out",id(a), id(1)  # func_out 41322472 41322472
+fun(a)
+print a  # 1
+```
+
+注：具体的值在不同电脑上运行时可能不同。
+
+可以看到，在执行完`a = 2`之后，`a`引用中保存的值，即内存地址发生变化，由原来`1`对象的所在的地址变成了`2`这个实体对象的内存地址。
+
+而第2个例子`a`引用保存的内存值就不会发生变化：
+
+```python
+a = []
+def fun(a):
+    print "func_in",id(a)  # func_in 53629256
+    a.append(1)
+print "func_out",id(a)     # func_out 53629256
+fun(a)
+print a  # [1]
+```
+
+这里记住的是类型是属于对象的，而不是变量。而对象有两种,“可更改”（mutable）与“不可更改”（immutable）对象。在python中，strings, tuples, 和numbers是不可更改的对象，而 list, dict, set 等则是可以修改的对象。(这就是这个问题的重点)
+
+当一个引用传递给函数的时候,函数自动复制一份引用,这个函数里的引用和外边的引用没有半毛关系了.所以第一个例子里函数把引用指向了一个不可变对象,当函数返回的时候,外面的引用没半毛感觉.而第二个例子就不一样了,函数内的引用指向的是可变对象,对它的操作就和定位了指针地址一样,在内存里进行修改.
+
+如果还不明白的话,这里有更好的解释: http://stackoverflow.com/questions/986006/how-do-i-pass-a-variable-by-reference
+
+***
+
+**知识点考察：**
+
+-   Python支持的参数传递模式：Python中唯一支持的参数传递模式是**共享传参(call by sharing)**，共享传参指的是函数的各个形式参数获得实参中各个**引用的副本**；也就是说，函数中**形参是实参的别名**;
+
+-   Python的变量：变量是标注（引用式变量），而不是盒子；最好把变量理解为附加在对象上的便利贴更贴切；
+
+    ```python
+    a = [1, 2, 3]
+    b = a # b是a的别名,绑定同一个对象
+    a.append(4)
+    print(b) # [1, 2 ,3 ,4]
+    ```
+
+-   可变类型对象和不可变类型对象
+
+    >可变类型对象：list、dict、set
+    >
+    >不可变类型对象：int、str、bool、tuple
+
+
+
+**知识点延伸考察：**
+
+-   **可变类型作为函数参数的默认值**
+
+```python
+class HauntedBus:
+    """ 定义一个Bus类 """
+    def __init__(self, passengers=[]):
+        self.passengers = passengers
+    
+    def pick(self, name):
+        self.passengers.append(name)
+        
+    def drop(self, name):
+		self.passengers.remove(name)
+        
+        
+        
+>>> bus1 = HauntedBus(['alice', 'lily'])
+>>> bus1.passengers
+['alice', 'lily']
+>>> bus1.pick('zgt')
+>>> bus1.drop('alice')
+>>> bus1.passengers  # bus1工作正常,没有出现异常
+['lily', 'zgt']
+>>> bus2 = HauntedBus() # bus2为空,把默认的空列表赋值给self.passengers
+>>> bus2.passengers
+[]
+>>> bus2.pick('jimi')
+>>> bus2.passengers
+['jimi']
+>>> bus3 = HauntedBus() # bus3和bus2一样为空
+>>> bus3.passengers 
+['jimi'] # 这里出现了异常,在bus2中的jimi出现在了bus3
+>>> bus3.pick('bill')
+>>> bus3.passengers
+['jimi', 'bill']
+>>> bus2.passengers
+['jimi', 'bill'] # 通过例子可以看出,bus2.passenger和bus3.passengers会共享同一个乘客列表（默认参数的空列表）
+```
+
+如果函数中定义了默认值参数，默认值会在定义函数时计算（通常在加载模块时），默认值会变成函数对象的属性。因此如果默认值是可变类型且修改了它的值的话，那么后续函数的调用可能会受影响。
+
+```python
+# 可以通过dir查看HauntedBus.__init__对象的属性
+>>> dir(HauntedBus.__init__)
+['__annotations__', '__call__', '__defaults__', ...]
+# 查看__defaults__属性的值
+>>> HauntedBus.__init__.__defaults__
+(['jimi', 'bill'],)
+# 最后可以证明下bus2.passengers是一个别名，绑定到HauntedBus.__init__.__defaults__属性的第一个元素对象上
+>>> HauntedBus.__init__.__defaults__[0] is bus2.passengers
+True
+>>> HauntedBus.__init__.__defaults__[0] is bus3.passengers
+True
+```
+
+-   如果业务中函数的默认参数需要接受可变类型参数，该如何防御？
+
+```python
+class HauntedBus:
+    """ 定义一个Bus类 """
+    def __init__(self, passengers=None):
+        if passengers is None:
+	        self.passengers = [] # 当没有传入passengers实参时,创建一个空列表
+        else:
+            self.passengers = list(passengers) # 当有传入passengers实参时,生成passengers的副本,如果不是列表则把它转换成列表
+    
+    def pick(self, name):
+        self.passengers.append(name)
+        
+    def drop(self, name):
+		self.passengers.remove(name)
+```
+
