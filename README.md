@@ -3,6 +3,10 @@
 
    * [Python Interview](#python_interview)
       * [1 Python语言特性](#1-python语言特性)
+      * [2 鸭子类型](#2-鸭子类型（duck typing）)
+      * [3 猴子补丁](#3-猴子补丁（monkey patch）)
+      * [4 Python中对象自省](#4-Python对象自省)
+      * [5 Python中函数参数传递](#5-Python中函数参数传递)
 
 <!-- markdown-toc end -->
 
@@ -113,13 +117,13 @@ for animal in animals_list:
 
 
 
-## 4 Python对象的自省
+## 4 Python对象自省
 
 自省（Introspection）是动态语言又一强大的特性，可以在运行时通过一定的机制查询到对象的内部结构；例如`dir()`、`isinstance()` 等。
 
 
 
-## Python中函数参数传递
+## 5 Python中函数参数传递
 
 from: [taizilongxu/interview_python](https://github.com/taizilongxu/interview_python)，对其进行了主要对考察的知识点&知识点延伸进行了补充。
 
