@@ -43,5 +43,78 @@ python是**动态**、**强类型**、**解释型语言**：
 
 
 
+## 2 鸭子类型（duck typing）
+
+>不要检查它是不是鸭子；检查它的叫声像不像鸭子、它走路的姿势像不像鸭子，等等。具体检查什么取决于你想使用语言的哪些行为。
+>
+>​																																															  ---- Alex Marteli
+
+在动态类型语言中，有“鸭子类型”这个术语，它关注的是**对象的行为**，而不是对象的类型。它让动态语言更加灵活，而不需要去实现一大堆模式。
+
+示例1：在Python中天然支持多态
+
+```python
+class Cat:
+    def say(self):
+        print("I am a cat")
+
+
+class Dog:
+    def say(self):
+        print("I am a dog")
+
+
+class Duck:
+    def say(self):
+        print("I am a duck")
+
+
+animals_list = [Cat, Dog, Duck]
+for animal in animals_list:
+    animal().say()  # 关注animal对象是否实现了say方法,而不在意其类型
+```
+
+示例2：list.extend()方法，对接受的参数关注的是否是可迭代的对象：
+
+```python
+    def extend(self, *args, **kwargs): # real signature unknown
+        """ Extend list by appending elements from the iterable. """
+        pass
+```
+
+示例：序列类型对象只需要实现 `__len__`和`__getitem__` 两个魔法方法，我们就可以说它是序列，因为它的行为像序列；
+
+示例4：例如file、StringIO、socket对象在Python文档中都叫“文件类对象”，因为它们行为基本与文件一致，实现了部分文件接口（read、write），满足上下文（with语句）相关需求等。
+
+## 3 猴子补丁（monkey patch）
+
+猴子补丁指的是在**运行时修改类或者模块，而不改动源码**。猴子补丁很强大，但是打补丁的代要与打补丁的程序耦合十分紧密；在Python中打猴子补丁不难，但是也有局限，Python不允许为内置类型打猴子补丁，因为这样可以确保str对象的方法始终是那些，能够减少外部库打的补丁有冲突的概率。
+
+例如常用的并发库gevent需要修改内置的socket模块（阻塞->非阻塞）：
+
+```python
+>>> import socket
+>>> socket.socket
+<class 'socket.socket'>
+# "after monkey patch"
+>>> from gevent import monkey
+>>> monkey.patch_socket()
+>>> socket.socket
+<class 'gevent._socket3.socket'>
+
+>>> import select
+>>> select.select
+<built-in function select>
+# "after monkey patch"
+>>> monkey.patch_select
+>>> select.select
+<function select at 0x7fecb02fe6a8>
+```
+
+
+
+## 4 Python对象的自省
+
+自省（Introspection）是动态语言又一强大的特性，可以在运行时通过一定的机制查询到对象的内部结构；例如`dir()`、`isinstance()` 等。
 
 
