@@ -7,6 +7,8 @@
       * [3 猴子补丁](#3-猴子补丁)
       * [4 Python中对象自省](#4-Python对象自省)
       * [5 Python中函数参数传递](#5-Python中函数参数传递)
+      * [6 args和kwargs](#6-args和kwargs)
+      * [7 装饰器](#7-装饰器)
 
 <!-- markdown-toc end -->
 
@@ -279,6 +281,58 @@ class HauntedBus:
     def drop(self, name):
 		self.passengers.remove(name)
 ```
+
+## 6 *args*和**kwargs**
+
+当函数中遇到可变参数时，可以使用 `*args` 和 `**kwargs` 来对传入的实参进行打包；
+
+示例一：通过*args可以把实参打包成元组进行传递
+
+```python
+def print_multiple_args(*args):
+    print(type(args))  # <class 'tuple'>
+    print(args) # ('a', 'b', 'c')
+
+# 传递方式一：
+print_multiple_args('a', 'b', 'c') 
+# 传递方式二：
+print_multiple_args(*['a', 'b', 'c']) 
+-----------------------------------------------
+<class 'tuple'>
+('a', 'b', 'c')
+```
+
+示例二：通过**kwargs可以把实参打包成字典进行传递
+
+```python
+def print_kwargs(**kwargs):
+    print(type(kwargs))
+    print(kwargs)
+
+# 传递方式一：
+print_kwargs(name='zgt', age=18)
+# 传递方式二：
+print_kwargs(**dict(name='zgt', age=18))
+-----------------------------------------------
+<class 'dict'>
+{'name': 'zgt', 'age': 18}
+```
+
+示例三：混合参数注意传递顺序
+
+```python
+def print_all(a, *args, **kwargs):
+    print(a)
+    print(args)
+    print(kwargs)
+
+print_all('hello', 'world', name='zgt')
+-----------------------------------------------
+hello
+('world',)
+{'name': 'zgt'}
+```
+
 
 ## 7 装饰器
 
